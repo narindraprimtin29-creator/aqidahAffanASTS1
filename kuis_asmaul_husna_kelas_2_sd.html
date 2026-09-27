@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Interaktif Asmaul Husna - Kelas 2 SD</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <!-- Google Fonts: Quicksand, Fredoka, & Amiri for Arabic -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Fredoka:wght@400;600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(135deg, #e0f2fe 0%, #dcfce7 50%, #fef9c3 100%);
+            min-height: 100vh;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .font-heading {
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        .font-arabic {
+            font-family: 'Amiri', serif;
+            direction: rtl;
+        }
+
+        /* Custom Bounce & Floating Animations */
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(2deg); }
+        }
+
+        .animate-float {
+            animation: floatSlow 4s ease-in-out infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+
+        .animate-shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .animate-pop {
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* Glassmorphism Card Effect */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            border: 4px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 20px 35px -10px rgba(16, 185, 129, 0.2),
+                        0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .btn-3d {
+            transition: all 0.15s ease;
+            box-shadow: 0 6px 0 shadow-color, 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-3d:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 shadow-color, 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Custom Scrollbar for Modal */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #10b981;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen text-slate-800 relative overflow-x-hidden">
+
+    <!-- Background Decorative Elements -->
+    <div class="fixed top-5 left-5 text-4xl opacity-30 animate-float pointer-events-none">☁️</div>
+    <div class="fixed top-12 right-10 text-5xl opacity-30 animate-float pointer-events-none" style="animation-delay: 1.5s;">🌟</div>
+    <div class="fixed bottom-10 left-10 text-5xl opacity-30 animate-float pointer-events-none" style="animation-delay: 2s;">🌙</div>
+    <div class="fixed bottom-12 right-6 text-4xl opacity-30 animate-float pointer-events-none" style="animation-delay: 0.8s;">✨</div>
+
+    <!-- Header Navigation & Audio Controls -->
+    <header class="w-full max-w-4xl mx-auto p-4 flex justify-between items-center z-10">
+        <div class="flex items-center space-x-3 bg-white/80 px-4 py-2 rounded-full shadow-md border-2 border-emerald-300">
+            <span class="text-2xl">🕌</span>
+            <span class="font-heading font-bold text-emerald-700 text-lg sm:text-xl">PAI Kelas 2 SD</span>
+        </div>
+        
+        <div class="flex items-center space-x-2">
+            <!-- BGM Toggle -->
+            <button id="bgmBtn" onclick="toggleBGM()" class="w-11 h-11 bg-white rounded-full border-2 border-emerald-400 shadow flex items-center justify-center text-emerald-600 hover:bg-emerald-50 active:scale-95 transition" title="Musik Latar">
+                <i id="bgmIcon" class="fas fa-music text-lg"></i>
+            </button>
+            <!-- Sound FX Toggle -->
+            <button id="sfxBtn" onclick="toggleSFX()" class="w-11 h-11 bg-white rounded-full border-2 border-emerald-400 shadow flex items-center justify-center text-emerald-600 hover:bg-emerald-50 active:scale-95 transition" title="Efek Suara">
+                <i id="sfxIcon" class="fas fa-volume-up text-lg"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-3xl w-full mx-auto p-4 flex flex-col justify-center items-center z-10">
+
+        <!-- SCREEN 1: START SCREEN -->
+        <div id="startScreen" class="w-full glass-card rounded-3xl p-6 sm:p-10 text-center animate-pop">
+            <div class="inline-block p-4 bg-emerald-100 rounded-full mb-4 border-4 border-emerald-200">
+                <span class="text-6xl sm:text-7xl">📖</span>
+            </div>
+            
+            <h1 class="font-heading text-3xl sm:text-5xl font-extrabold text-emerald-700 mb-2 leading-tight">
+                Kuis Asmaul Husna
+            </h1>
+            <p class="text-slate-600 font-semibold text-base sm:text-lg mb-6">
+                Pendidikan Agama Islam & Budi Pekerti • Kelas 2 SD (Semester 1)
+            </p>
+
+            <div class="bg-emerald-50 border-2 border-dashed border-emerald-300 rounded-2xl p-4 sm:p-6 mb-8 text-left space-y-3 text-slate-700 text-sm sm:text-base">
+                <div class="font-bold text-emerald-800 flex items-center gap-2 text-lg">
+                    <span>💡</span> Pentunjuk Permainan:
+                </div>
+                <ul class="list-disc list-inside space-y-1.5 text-slate-600">
+                    <li>Ada <strong>30 soal pilihan ganda</strong> mengenai sifat-sifat Allah.</li>
+                    <li>Klik tombol <strong>🔊 Suara Soal</strong> untuk mendengarkan bacaan soal.</li>
+                    <li>Jika menjawab <strong>Salah</strong>, akan muncul penjelasannya agar kamu bisa belajar.</li>
+                    <li>Kumpulkan skor tertinggi dan jadilah <strong>Bintang Klasemen!</strong> 🌟</li>
+                </ul>
+            </div>
+
+            <button onclick="startGame()" class="w-full sm:w-auto px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-heading text-xl sm:text-2xl font-bold rounded-2xl border-b-8 border-emerald-700 active:border-b-0 active:translate-y-2 transition-all shadow-lg flex items-center justify-center gap-3 mx-auto">
+                <span>Mulai Bermain</span>
+                <i class="fas fa-play-circle text-2xl"></i>
+            </button>
+        </div>
+
+        <!-- SCREEN 2: QUIZ GAMEPLAY SCREEN -->
+        <div id="quizScreen" class="w-full glass-card rounded-3xl p-5 sm:p-8 hidden animate-pop">
+            <!-- Stats Header -->
+            <div class="flex flex-wrap justify-between items-center gap-3 mb-6 bg-emerald-50/80 p-3.5 rounded-2xl border-2 border-emerald-200">
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl">🎯</span>
+                    <div>
+                        <div class="text-xs text-slate-500 font-bold uppercase">Progres</div>
+                        <div id="questionNumber" class="font-heading font-extrabold text-emerald-700 text-base sm:text-lg">Soal 1/30</div>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl">🔥</span>
+                    <div>
+                        <div class="text-xs text-slate-500 font-bold uppercase">Beruntun</div>
+                        <div id="streakText" class="font-heading font-extrabold text-amber-600 text-base sm:text-lg">0x</div>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl">⭐</span>
+                    <div>
+                        <div class="text-xs text-slate-500 font-bold uppercase">Skor Saya</div>
+                        <div id="scoreText" class="font-heading font-extrabold text-emerald-600 text-base sm:text-lg">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full bg-slate-200 h-4 rounded-full overflow-hidden mb-6 border border-slate-300">
+                <div id="progressBar" class="bg-gradient-to-r from-emerald-400 to-teal-500 h-full w-0 transition-all duration-300 rounded-full"></div>
+            </div>
+
+            <!-- Question Card -->
+            <div id="questionCard" class="bg-white rounded-2xl p-5 sm:p-7 shadow-sm border-2 border-emerald-100 mb-6 relative">
+                <!-- Audio Reader Button -->
+                <button onclick="speakQuestion()" class="absolute top-4 right-4 bg-sky-100 hover:bg-sky-200 text-sky-700 p-2.5 rounded-full transition-all flex items-center justify-center border border-sky-300 shadow-sm" title="Dengarkan Soal">
+                    <i class="fas fa-volume-high text-lg"></i>
+                </button>
+
+                <div class="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-2">Pertanyaan:</div>
+
+                <!-- Arabic Text Display (if present) -->
+                <div id="arabicContainer" class="hidden my-3 text-center py-3 bg-amber-50/60 rounded-xl border border-amber-200">
+                    <span id="arabicText" class="font-arabic text-3xl sm:text-4xl text-amber-900 font-bold leading-relaxed"></span>
+                </div>
+
+                <!-- Indonesian Question Text -->
+                <h2 id="questionText" class="font-heading font-semibold text-slate-800 text-lg sm:text-2xl leading-snug pr-10">
+                    Memuat pertanyaan...
+                </h2>
+            </div>
+
+            <!-- Options Container (3 Choices: A, B, C) -->
+            <div id="optionsContainer" class="grid grid-cols-1 gap-3.5 sm:gap-4 mb-2">
+                <!-- Dynamically Generated Buttons -->
+            </div>
+        </div>
+
+        <!-- SCREEN 3: RESULT SCREEN -->
+        <div id="resultScreen" class="w-full glass-card rounded-3xl p-6 sm:p-10 text-center hidden animate-pop">
+            <div class="text-6xl mb-2">🏆</div>
+            <h2 id="resultTitle" class="font-heading text-3xl sm:text-4xl font-extrabold text-emerald-800 mb-1">
+                Masya Allah!
+            </h2>
+            <p id="resultSubtitle" class="text-slate-600 font-semibold mb-6">
+                Kamu Anak Sholeh & Pintar!
+            </p>
+
+            <!-- Star Rating Badge -->
+            <div class="flex justify-center items-center gap-2 mb-6">
+                <span id="star1" class="text-4xl text-amber-300">★</span>
+                <span id="star2" class="text-5xl text-amber-400">★</span>
+                <span id="star3" class="text-4xl text-amber-300">★</span>
+            </div>
+
+            <!-- Detailed Score Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
+                <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-200">
+                    <div class="text-xs text-slate-500 font-bold uppercase">Total Skor</div>
+                    <div id="finalScore" class="font-heading text-3xl font-extrabold text-emerald-600">0</div>
+                </div>
+                <div class="bg-sky-50 p-4 rounded-2xl border border-sky-200">
+                    <div class="text-xs text-slate-500 font-bold uppercase">Jawaban Benar</div>
+                    <div id="finalCorrect" class="font-heading text-3xl font-extrabold text-sky-600">0</div>
+                </div>
+                <div class="bg-rose-50 p-4 rounded-2xl border border-rose-200 col-span-2 sm:col-span-1">
+                    <div class="text-xs text-slate-500 font-bold uppercase">Jawaban Salah</div>
+                    <div id="finalWrong" class="font-heading text-3xl font-extrabold text-rose-600">0</div>
+                </div>
+            </div>
+
+            <!-- Restart Button -->
+            <button onclick="restartGame()" class="w-full sm:w-auto px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-heading text-xl font-bold rounded-2xl border-b-8 border-emerald-700 active:border-b-0 active:translate-y-2 transition-all shadow-lg flex items-center justify-center gap-3 mx-auto">
+                <i class="fas fa-rotate-right text-xl"></i>
+                <span>Main Lagi</span>
+            </button>
+        </div>
+
+    </main>
+
+    <!-- EXPLANATION POPUP / MODAL FOR WRONG ANSWERS -->
+    <div id="explanationModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white w-full max-w-lg rounded-3xl p-6 sm:p-8 shadow-2xl border-4 border-rose-200 animate-pop max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center gap-3 text-rose-600 mb-4">
+                <div class="w-12 h-12 bg-rose-100 rounded-2xl flex items-center justify-center text-2xl shrink-0">
+                    ❌
+                </div>
+                <div>
+                    <h3 class="font-heading font-extrabold text-xl sm:text-2xl text-rose-600">Jawaban Kurang Tepat</h3>
+                    <p class="text-xs font-semibold text-slate-500">Yuk, pelajari pembahasan berikut ini!</p>
+                </div>
+            </div>
+
+            <!-- Correct Answer Box -->
+            <div class="bg-emerald-50 border-2 border-emerald-300 rounded-2xl p-4 mb-4">
+                <div class="text-xs font-bold text-emerald-700 uppercase mb-1">Kunci Jawaban Yang Benar:</div>
+                <div id="correctAnswerText" class="font-heading font-bold text-slate-800 text-lg text-emerald-900">
+                    -
+                </div>
+            </div>
+
+            <!-- Explanation Box -->
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 mb-6">
+                <div class="text-xs font-bold text-slate-500 uppercase mb-1">Penjelasan Singkat:</div>
+                <p id="explanationText" class="text-slate-700 leading-relaxed font-medium text-sm sm:text-base">
+                    -
+                </p>
+            </div>
+
+            <!-- Continue Button -->
+            <button onclick="nextQuestion()" class="w-full py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-heading text-lg font-bold rounded-2xl border-b-4 border-emerald-700 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2">
+                <span>Lanjut Ke Soal Berikutnya</span>
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="w-full text-center py-4 text-xs font-bold text-slate-500 z-10">
+        Kuis PAI Kelas 2 SD • Materi Asmaul Husna • Dibuat dengan ❤️ untuk Anak Sholeh
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC & DATA -->
+    <script>
+        // 30 Questions Dataset (PAI Kelas 2 SD Semester 1 - Asmaul Husna)
+        const questionsData = [
+            {
+                question: "Nama-nama Allah yang baik dan indah sering disebut dengan istilah?",
+                options: ["Asmaul Husna", "Sifat 20", "Kitab Suci"],
+                answer: 0,
+                explanation: "Asmaul Husna artinya nama-nama Allah SWT yang sangat baik, indah, dan sempurna."
+            },
+            {
+                question: "Salah satu Asmaul Husna yaitu Ar-Rahman, yang artinya?",
+                options: ["Maha Penyayang", "Maha Pengasih", "Maha Suci"],
+                answer: 1,
+                explanation: "Ar-Rahman artinya Allah Maha Pengasih. Kasih sayang Allah di dunia diberikan kepada semua makhluk-Nya."
+            },
+            {
+                question: "Arti dari Asmaul Husna Al-Quddus yaitu?",
+                options: ["Maha Suci", "Maha Merajai", "Maha Pengasih"],
+                answer: 0,
+                explanation: "Al-Quddus artinya Allah Maha Suci dari segala kekurangan dan cela."
+            },
+            {
+                question: "Arti dari Asmaul Husna Al-Malik yaitu?",
+                options: ["Maha Penyayang", "Maha Merajai / Menguasai", "Maha Mendengar"],
+                answer: 1,
+                explanation: "Al-Malik artinya Allah Maha Merajai atau Maha Menguasai seluruh alam semesta."
+            },
+            {
+                question: "Allah SWT memberikan kasih sayang-Nya di akhirat khusus kepada orang beriman dan taat, merupakan cerminan sifat Asmaul Husna?",
+                options: ["Ar-Rahman", "Ar-Rahim", "Al-Quddus"],
+                answer: 1,
+                explanation: "Ar-Rahim artinya Maha Penyayang, di mana kasih sayang khusus ini diberikan kepada orang beriman kelak di akhirat."
+            },
+            {
+                question: "Lafal Asmaul Husna dibaca?",
+                arabic: "الرَّحْمٰنُ",
+                options: ["Ar-Rahman", "Ar-Rahim", "Al-Malik"],
+                answer: 0,
+                explanation: "Lafal الرَّحْمٰنُ dibaca Ar-Rahman yang berarti Maha Pengasih."
+            },
+            {
+                question: "Tulisan bahasa Arab dari Asmaul Husna Al-Quddus yang benar adalah?",
+                options: ["الْقُدُّوْسُ", "الْمَلِكُ", "الرَّحِيْمُ"],
+                answer: 0,
+                explanation: "Tulisan Arab untuk Al-Quddus yang benar adalah الْقُدُّوْسُ."
+            },
+            {
+                question: "Tulisan bahasa Arab dari Asmaul Husna Al-Malik yang benar adalah?",
+                options: ["الرَّحْمٰنُ", "الْمَلِكُ", "الْقُدُّوْسُ"],
+                answer: 1,
+                explanation: "Tulisan Arab untuk Al-Malik yang benar adalah الْمَلِكُ."
+            },
+            {
+                question: "Membuang sampah pada tempatnya dan menjaga kebersihan merupakan salah satu bentuk pengamalan Asmaul Husna?",
+                options: ["Al-Malik", "Al-Quddus", "Ar-Rahman"],
+                answer: 1,
+                explanation: "Al-Quddus artinya Maha Suci. Kita mengamalkannya dengan menjaga kebersihan badan, pakaian, dan lingkungan."
+            },
+            {
+                question: "Jumlah Asmaul Husna yang wajib kita ketahui ada sebanyak?",
+                options: ["25", "99", "100"],
+                answer: 1,
+                explanation: "Jumlah nama-nama indah Allah (Asmaul Husna) yang wajib kita ketahui ada 99."
+            },
+            {
+                question: "Asmaul Husna Ar-Rahman menjadi nama salah satu surah dalam Al-Qur'an, yaitu surah?",
+                options: ["Surah Ar-Rahman", "Surah Al-Fatihah", "Surah Al-Ikhlas"],
+                answer: 0,
+                explanation: "Surah Ar-Rahman adalah surah ke-55 dalam Al-Qur'an yang menjelaskan nikmat-nikmat Allah SWT."
+            },
+            {
+                question: "Arti dari Asmaul Husna Ar-Rahim adalah?",
+                options: ["Maha Pengasih", "Maha Penyayang", "Maha Pencipta"],
+                answer: 1,
+                explanation: "Ar-Rahim artinya Allah Maha Penyayang."
+            },
+            {
+                question: "Memberi makan dan minum kepada kucing atau hewan peliharaan adalah bentuk kasih sayang kepada?",
+                options: ["Hewan / Ciptaan Allah", "Diri Sendiri", "Malaikat"],
+                answer: 0,
+                explanation: "Menyayangi hewan adalah bentuk mengamalkan sifat kasih sayang (Ar-Rahman & Ar-Rahim) kepada sesama ciptaan Allah."
+            },
+            {
+                question: "Salah satu bentuk pengamalan dari Asmaul Husna Al-Quddus dalam kehidupan sehari-hari adalah?",
+                options: ["Mandi dan mencuci tangan hingga bersih", "Membeli mainan mahal", "Tidur seharian"],
+                answer: 0,
+                explanation: "Mandi dan mencuci tangan mencerminkan sifat Al-Quddus karena menjaga kebersihan dan kesucian diri."
+            },
+            {
+                question: "Allah Maha Merajai seluruh alam semesta karena Allah memiliki sifat?",
+                options: ["Al-Quddus", "Al-Malik", "Ar-Rahim"],
+                answer: 1,
+                explanation: "Al-Malik artinya Allah yang menguasai dan merajai seluruh langit dan bumi."
+            },
+            {
+                question: "Menyayangi teman dan tidak membeda-bedakan kawan adalah cerminan dari sifat?",
+                options: ["Ar-Rahman", "Al-Quddus", "Al-Malik"],
+                answer: 0,
+                explanation: "Sifat Ar-Rahman (Maha Pengasih) mengajarkan kita untuk mengasihi dan bersikap baik kepada semua teman."
+            },
+            {
+                question: "Menjaga kesucian hati dari sifat iri dan dengki adalah pengamalan Asmaul Husna?",
+                options: ["Al-Malik", "Al-Quddus", "Ar-Rahman"],
+                answer: 1,
+                explanation: "Al-Quddus mengajar kita menyucikan lahiriah (badan) dan batiniah (hati dari sifat tercela)."
+            },
+            {
+                question: "Lafal bahasa Arab dari Asmaul Husna Ar-Rahim adalah?",
+                options: ["الرَّحِيْمُ", "الْمَلِكُ", "الرَّحْمٰنُ"],
+                answer: 0,
+                explanation: "Lafal bahasa Arab untuk Ar-Rahim adalah الرَّحِيْمُ."
+            },
+            {
+                question: "Menjaga kebersihan pakaian dan tempat salat merupakan pengamalan sifat?",
+                options: ["Al-Quddus", "Al-Malik", "Ar-Rahim"],
+                answer: 0,
+                explanation: "Salat harus dalam keadaan suci, yang merupakan bentuk pengamalan nilai-nilai Al-Quddus (Maha Suci)."
+            },
+            {
+                question: "Asmaul Husna artinya nama-nama Allah yang?",
+                options: ["Baik dan Indah", "Panjang dan Rumit", "Lama dan Kuno"],
+                answer: 0,
+                explanation: "Asmaul Husna berasal dari kata 'Asma' (nama) dan 'Husna' (yang baik/indah)."
+            },
+            {
+                question: "Kasih sayang Allah SWT di dunia diberikan kepada?",
+                options: ["Semua makhluk-Nya", "Manusia saja", "Orang kaya saja"],
+                answer: 0,
+                explanation: "Sifat Ar-Rahman Allah meliputi seluruh makhluk di dunia: manusia, hewan, tumbuhan, dan lainnya."
+            },
+            {
+                question: "Contoh pengamalan sifat Al-Malik sebagai seorang siswa di sekolah adalah?",
+                options: ["Menjaga ketertiban dan menaati aturan kelas", "Memusuhi teman", "Merusak meja kelas"],
+                answer: 0,
+                explanation: "Al-Malik mengajarkan kita memimpin diri sendiri dengan baik, yaitu tertib dan patuh pada aturan."
+            },
+            {
+                question: "Mengasihi adik dan merawat tanaman di rumah termasuk perbuatan yang disukai Allah karena mencerminkan sifat?",
+                options: ["Ar-Rahman dan Ar-Rahim", "Al-Quddus saja", "Al-Malik saja"],
+                answer: 0,
+                explanation: "Mengasihi adik dan merawat tanaman adalah cerminan dari sifat Ar-Rahman dan Ar-Rahim (Pengasih dan Penyayang)."
+            },
+            {
+                question: "Berwudu sebelum melaksanakan salat bertujuan untuk menyucikan diri dari hadas, sesuai dengan Asmaul Husna?",
+                options: ["Al-Quddus", "Al-Malik", "Ar-Rahman"],
+                answer: 0,
+                explanation: "Berwudu menyucikan diri dari hadas kecil, sesuai cerminan Al-Quddus (Maha Suci)."
+            },
+            {
+                question: "Raja dari segala raja di alam semesta ini adalah?",
+                options: ["Allah SWT", "Presiden", "Raja Manusia"],
+                answer: 0,
+                explanation: "Allah SWT adalah Raja dari segala raja (Al-Malik) yang kekuasaan-Nya bersifat abadi."
+            },
+            {
+                question: "Membantu hewan yang terluka atau terperangkap merupakan cerminan sikap?",
+                options: ["Kasih sayang", "Sombong", "Arogansi"],
+                answer: 0,
+                explanation: "Membantu makhluk yang membutuhkan adalah wujud kasih sayang yang diperintahkan dalam Islam."
+            },
+            {
+                question: "Sifat Ar-Rahman Allah diberikan kepada manusia di dunia tanpa membedakan yang beriman maupun yang?",
+                options: ["Kafir / Tidak beriman", "Malaikat", "Nabi"],
+                answer: 0,
+                explanation: "Di dunia, Allah memberikan rezeki dan nafas kehidupan kepada semua manusia, baik yang beriman maupun tidak beriman."
+            },
+            {
+                question: "Kitab suci umat Islam yang di dalamnya terdapat Asmaul Husna adalah?",
+                options: ["Al-Qur'an", "Tawrat", "Injil"],
+                answer: 0,
+                explanation: "Asmaul Husna tercantum di dalam kitab suci Al-Qur'an al-Karim."
+            },
+            {
+                question: "Melakukan piket kelas bersama teman-teman agar kelas menjadi bersih adalah pengamalan sifat?",
+                options: ["Al-Quddus", "Al-Malik", "Ar-Rahim"],
+                answer: 0,
+                explanation: "Membersihkan ruang kelas bersama-sama adalah contoh nyata meneladani sifat Al-Quddus (Maha Suci/Bersih)."
+            },
+            {
+                question: "Membantu, memohon pertolongan, dan perlindungan hanya dilakukan kepada Allah karena Allah Maha Menguasai segalanya (Al-Malik). Kita tidak boleh menyembah selain?",
+                options: ["Allah SWT", "Matahari", "Patung"],
+                answer: 0,
+                explanation: "Hanya Allah SWT satu-satunya Tuhan yang wajib disembah dan tempat memohon pertolongan."
+            }
+        ];
+
+        // Game State Variables
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let correctCount = 0;
+        let wrongCount = 0;
+        let streak = 0;
+        let isAudioMuted = false;
+        let isBgmPlaying = false;
+
+        // Audio Context (Web Audio API for pure procedural SFX & BGM)
+        let audioCtx = null;
+        let bgmOscillator1 = null;
+        let bgmOscillator2 = null;
+        let bgmGain = null;
+        let bgmInterval = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // Sound Effects (Web Audio API Synthesizer)
+        function playSFX(type) {
+            if (isAudioMuted) return;
+            initAudio();
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'correct') {
+                // Happy Chime Triad (C5 -> E5 -> G5 -> C6)
+                const freqs = [523.25, 659.25, 783.99, 1046.50];
+                freqs.forEach((freq, index) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + index * 0.08);
+
+                    gain.gain.setValueAtTime(0, now + index * 0.08);
+                    gain.gain.linearRampToValueAtTime(0.2, now + index * 0.08 + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + index * 0.08 + 0.3);
+
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+
+                    osc.start(now + index * 0.08);
+                    osc.stop(now + index * 0.08 + 0.35);
+                });
+            } else if (type === 'wrong') {
+                // Low Buzz / Error tone
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(160, now);
+                osc.frequency.linearRampToValueAtTime(110, now + 0.3);
+
+                gain.gain.setValueAtTime(0.25, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.35);
+            } else if (type === 'click') {
+                // Soft click sound
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(600, now);
+                osc.frequency.exponentialRampToValueAtTime(200, now + 0.05);
+
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.05);
+            } else if (type === 'victory') {
+                // Fanfare melody
+                const notes = [
+                    {f: 523.25, d: 0.15}, {f: 659.25, d: 0.15}, 
+                    {f: 783.99, d: 0.15}, {f: 1046.50, d: 0.4}
+                ];
+                let time = now;
+                notes.forEach(note => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(note.f, time);
+
+                    gain.gain.setValueAtTime(0.2, time);
+                    gain.gain.exponentialRampToValueAtTime(0.001, time + note.d);
+
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+
+                    osc.start(time);
+                    osc.stop(time + note.d + 0.05);
+                    time += note.d;
+                });
+            }
+        }
+
+        // Procedural Soft Peaceful Background Music (BGM)
+        function toggleBGM() {
+            initAudio();
+            const bgmBtn = document.getElementById('bgmBtn');
+            const bgmIcon = document.getElementById('bgmIcon');
+
+            if (isBgmPlaying) {
+                stopBGM();
+                bgmIcon.className = "fas fa-music text-lg text-slate-400";
+                bgmBtn.classList.remove('border-emerald-500', 'bg-emerald-100');
+            } else {
+                startBGM();
+                bgmIcon.className = "fas fa-music text-lg text-emerald-600 animate-pulse";
+                bgmBtn.classList.add('border-emerald-500', 'bg-emerald-100');
+            }
+        }
+
+        function startBGM() {
+            if (isBgmPlaying) return;
+            isBgmPlaying = true;
+
+            const pentatonicScale = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25];
+            let step = 0;
+
+            bgmInterval = setInterval(() => {
+                if (!isBgmPlaying || !audioCtx) return;
+                const now = audioCtx.currentTime;
+                const freq = pentatonicScale[step % pentatonicScale.length];
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now);
+
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(0.03, now + 0.1);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start(now);
+                osc.stop(now + 1.25);
+
+                step = (step + Math.floor(Math.random() * 3) + 1);
+            }, 600);
+        }
+
+        function stopBGM() {
+            isBgmPlaying = false;
+            if (bgmInterval) clearInterval(bgmInterval);
+        }
+
+        function toggleSFX() {
+            isAudioMuted = !isAudioMuted;
+            const sfxIcon = document.getElementById('sfxIcon');
+            if (isAudioMuted) {
+                sfxIcon.className = "fas fa-volume-mute text-lg text-rose-500";
+            } else {
+                sfxIcon.className = "fas fa-volume-up text-lg text-emerald-600";
+                playSFX('click');
+            }
+        }
+
+        // Text-To-Speech Audio Reader Function
+        function speakQuestion() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // Stop any active speech
+
+                const qData = questionsData[currentQuestionIndex];
+                let textToRead = "Pertanyaan nomor " + (currentQuestionIndex + 1) + ". " + qData.question;
+
+                // Add option choices to speech
+                textToRead += ". Pilihan jawaban. A: " + qData.options[0] + ". B: " + qData.options[1] + ". C: " + qData.options[2];
+
+                const utterance = new SpeechSynthesisUtterance(textToRead);
+                utterance.lang = 'id-ID';
+                utterance.rate = 0.9; // Slightly slower for primary school kids
+                utterance.pitch = 1.1; // Cheerful friendly pitch
+
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert("Fitur pembaca suara tidak didukung oleh browser ini.");
+            }
+        }
+
+        // Start Game
+        function startGame() {
+            playSFX('click');
+            initAudio();
+
+            currentQuestionIndex = 0;
+            score = 0;
+            correctCount = 0;
+            wrongCount = 0;
+            streak = 0;
+
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('quizScreen').classList.remove('hidden');
+
+            renderQuestion();
+        }
+
+        // Render Current Question
+        function renderQuestion() {
+            const q = questionsData[currentQuestionIndex];
+
+            // Update Header Stats
+            document.getElementById('questionNumber').innerText = `Soal ${currentQuestionIndex + 1}/${questionsData.length}`;
+            document.getElementById('scoreText').innerText = score;
+            document.getElementById('streakText').innerText = `${streak}x`;
+
+            // Progress Bar
+            const progressPercent = ((currentQuestionIndex + 1) / questionsData.length) * 100;
+            document.getElementById('progressBar').style.width = `${progressPercent}%`;
+
+            // Set Question Text
+            document.getElementById('questionText').innerText = q.question;
+
+            // Handle Arabic Display
+            const arabicContainer = document.getElementById('arabicContainer');
+            const arabicText = document.getElementById('arabicText');
+            if (q.arabic) {
+                arabicText.innerText = q.arabic;
+                arabicContainer.classList.remove('hidden');
+            } else {
+                arabicContainer.classList.add('hidden');
+            }
+
+            // Render 3 Options (A, B, C)
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+
+            const prefixes = ['A', 'B', 'C'];
+            const colors = [
+                { bg: 'bg-emerald-50 hover:bg-emerald-100 border-emerald-300 text-emerald-900', badge: 'bg-emerald-500 text-white' },
+                { bg: 'bg-sky-50 hover:bg-sky-100 border-sky-300 text-sky-900', badge: 'bg-sky-500 text-white' },
+                { bg: 'bg-amber-50 hover:bg-amber-100 border-amber-300 text-amber-900', badge: 'bg-amber-500 text-white' }
+            ];
+
+            q.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = `w-full text-left p-4 rounded-2xl border-2 font-heading font-bold text-base sm:text-lg flex items-center gap-3 transition-all transform active:scale-95 shadow-sm ${colors[index].bg}`;
+                btn.onclick = () => selectAnswer(index);
+
+                btn.innerHTML = `
+                    <span class="w-9 h-9 rounded-xl flex items-center justify-center font-extrabold shrink-0 shadow-sm ${colors[index].badge}">
+                        ${prefixes[index]}
+                    </span>
+                    <span class="flex-1">${opt}</span>
+                `;
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        // Answer Selection Logic
+        function selectAnswer(selectedIndex) {
+            // Stop speech if playing
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+
+            const q = questionsData[currentQuestionIndex];
+            const optionButtons = document.getElementById('optionsContainer').children;
+
+            // Disable all buttons to prevent double click
+            for (let btn of optionButtons) {
+                btn.disabled = true;
+            }
+
+            if (selectedIndex === q.answer) {
+                // --- CORRECT ANSWER ---
+                playSFX('correct');
+                optionButtons[selectedIndex].classList.remove('bg-emerald-50', 'bg-sky-50', 'bg-amber-50');
+                optionButtons[selectedIndex].classList.add('bg-emerald-500', 'text-white', 'border-emerald-600', 'animate-pop');
+
+                score += 10 + (streak * 2); // Bonus points for streak
+                correctCount++;
+                streak++;
+
+                // Auto proceed after short delay
+                setTimeout(() => {
+                    nextQuestion();
+                }, 1200);
+
+            } else {
+                // --- WRONG ANSWER ---
+                playSFX('wrong');
+                optionButtons[selectedIndex].classList.remove('bg-emerald-50', 'bg-sky-50', 'bg-amber-50');
+                optionButtons[selectedIndex].classList.add('bg-rose-500', 'text-white', 'border-rose-600', 'animate-shake');
+
+                // Highlight correct button in soft green
+                optionButtons[q.answer].classList.add('ring-4', 'ring-emerald-400', 'bg-emerald-100');
+
+                wrongCount++;
+                streak = 0; // Reset streak
+
+                // Show Explanation Modal after delay
+                setTimeout(() => {
+                    showExplanationModal();
+                }, 800);
+            }
+        }
+
+        // Show Wrong Answer Explanation Modal
+        function showExplanationModal() {
+            const q = questionsData[currentQuestionIndex];
+            const prefixes = ['A', 'B', 'C'];
+
+            document.getElementById('correctAnswerText').innerText = `${prefixes[q.answer]}. ${q.options[q.answer]}`;
+            document.getElementById('explanationText').innerText = q.explanation;
+            document.getElementById('explanationModal').classList.remove('hidden');
+        }
+
+        // Advance to Next Question or Show Result
+        function nextQuestion() {
+            // Hide modal if open
+            document.getElementById('explanationModal').classList.add('hidden');
+
+            currentQuestionIndex++;
+
+            if (currentQuestionIndex < questionsData.length) {
+                renderQuestion();
+            } else {
+                showResultScreen();
+            }
+        }
+
+        // Display Final Result Screen
+        function showResultScreen() {
+            playSFX('victory');
+
+            // Trigger confetti
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            }
+
+            document.getElementById('quizScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.remove('hidden');
+
+            document.getElementById('finalScore').innerText = score;
+            document.getElementById('finalCorrect').innerText = correctCount;
+            document.getElementById('finalWrong').innerText = wrongCount;
+
+            // Rating Stars logic
+            const star1 = document.getElementById('star1');
+            const star2 = document.getElementById('star2');
+            const star3 = document.getElementById('star3');
+
+            const percentage = (correctCount / questionsData.length) * 100;
+
+            if (percentage >= 80) {
+                document.getElementById('resultTitle').innerText = "Masya Allah! Luar Biasa! 🌟";
+                document.getElementById('resultSubtitle').innerText = "Kamu Sangat Pintar & Paham Asmaul Husna!";
+                star1.className = "text-4xl text-amber-400 animate-bounce";
+                star2.className = "text-5xl text-amber-400 animate-bounce";
+                star3.className = "text-4xl text-amber-400 animate-bounce";
+            } else if (percentage >= 50) {
+                document.getElementById('resultTitle').innerText = "Alhamdulillah! Bagus Sekali! 👍";
+                document.getElementById('resultSubtitle').innerText = "Tingkatkan Lagi Belajarnya ya!";
+                star1.className = "text-4xl text-amber-400";
+                star2.className = "text-5xl text-amber-400";
+                star3.className = "text-4xl text-slate-300";
+            } else {
+                document.getElementById('resultTitle').innerText = "Tetap Semangat! 💪";
+                document.getElementById('resultSubtitle').innerText = "Ayo Belajar Lagi dan Coba Sekali Lagi!";
+                star1.className = "text-4xl text-amber-400";
+                star2.className = "text-5xl text-slate-300";
+                star3.className = "text-4xl text-slate-300";
+            }
+        }
+
+        // Restart Game
+        function restartGame() {
+            playSFX('click');
+            startGame();
+        }
+    </script>
+</body>
+</html>
